@@ -15,37 +15,53 @@ exports.createDependent = async (req, res) => {
     });
 
     const savedDependent = await newDependent.save();
-    res.status(201).json({ message: "Dependent created successfully", data: savedDependent });
+    res
+      .status(201)
+      .json({
+        message: "Dependent created successfully",
+        data: savedDependent,
+      });
   } catch (error) {
-    res.status(500).json({ message: "Error creating dependent", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error creating dependent", error: error.message });
   }
 };
 
 // Get all dependents
 exports.getAllDependents = async (req, res) => {
-    console.log('dependents')
+  console.log("dependents");
   try {
     const dependents = await Dependent.find();
     // console.log(dependents)
-    res.status(200).json({ message: "Dependents retrieved successfully", data: dependents });
+    res
+      .status(200)
+      .json({ message: "Dependents retrieved successfully", data: dependents });
   } catch (error) {
-    res.status(500).json({ message: "Error retrieving dependents", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error retrieving dependents", error: error.message });
   }
 };
 
 // Get a single dependent by ID
-exports.getDependentById = async (req, res) => {
+exports.getDependentsById = async (req, res) => {
   try {
-    const { id } = req.params;
-    const dependent = await Dependent.findOne({ id });
+    const { member_id } = req.params;
+    // console.log(member_id)
+    const dependents = await Dependent.find({ member_id: member_id });
 
-    if (!dependent) {
+    if (!dependents) {
       return res.status(404).json({ message: "Dependent not found" });
     }
 
-    res.status(200).json({ message: "Dependent retrieved successfully", data: dependent });
+    res
+      .status(200)
+      .json({ message: "Dependent retrieved successfully", dependents });
   } catch (error) {
-    res.status(500).json({ message: "Error retrieving dependent", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error retrieving dependent", error: error.message });
   }
 };
 
@@ -64,9 +80,16 @@ exports.updateDependentById = async (req, res) => {
       return res.status(404).json({ message: "Dependent not found" });
     }
 
-    res.status(200).json({ message: "Dependent updated successfully", data: updatedDependent });
+    res
+      .status(200)
+      .json({
+        message: "Dependent updated successfully",
+        data: updatedDependent,
+      });
   } catch (error) {
-    res.status(500).json({ message: "Error updating dependent", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error updating dependent", error: error.message });
   }
 };
 
@@ -81,8 +104,15 @@ exports.deleteDependentById = async (req, res) => {
       return res.status(404).json({ message: "Dependent not found" });
     }
 
-    res.status(200).json({ message: "Dependent deleted successfully", data: deletedDependent });
+    res
+      .status(200)
+      .json({
+        message: "Dependent deleted successfully",
+        data: deletedDependent,
+      });
   } catch (error) {
-    res.status(500).json({ message: "Error deleting dependent", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error deleting dependent", error: error.message });
   }
 };

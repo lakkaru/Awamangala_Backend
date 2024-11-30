@@ -21,7 +21,7 @@ router.post("/deleteMember", memberController.deleteMember);
 
 router.post("/dependent", dependantController.createDependent);
 router.get("/dependents", dependantController.getAllDependents);
-router.get("/dependent/:id", dependantController.getDependentById);
+router.get("/dependents/:member_id", dependantController.getDependentsById);
 router.put("/dependent/:id", dependantController.updateDependentById);
 router.delete("/dependent/:id", dependantController.deleteDependentById);
 
