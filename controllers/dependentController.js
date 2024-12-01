@@ -1,4 +1,4 @@
-const Dependent = require("../models/dependant");
+const Dependent = require("../models/dependent");
 
 // Create a new dependent
 exports.createDependent = async (req, res) => {

@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const Schema = mongoose.Schema;
 
-const DependantSchema = new Schema({
+const DependentSchema = new Schema({
   id: {
     type: Number,
     required: true,
@@ -50,6 +50,6 @@ const DependantSchema = new Schema({
 // MemberSchema.index({ email: 1 });
 // MemberSchema.index({ name: 1 });
 
-const Dependant = mongoose.model("Dependant", DependantSchema);
+const Dependent = mongoose.model("Dependent", DependentSchema);
 
-module.exports = Dependant;
+module.exports = Dependent;
