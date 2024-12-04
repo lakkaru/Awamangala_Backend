@@ -39,6 +39,7 @@ exports.getAllLoans = async (req, res) => {
 exports.getLoansByMemberId = async (req, res) => {
   try {
     const { memberId } = req.params;
+    // console.log(memberId)
     const loans = await Loan.find({ memberId });
     if (loans.length === 0) {
       return res.status(404).json({ message: 'No loans found for the specified member' });

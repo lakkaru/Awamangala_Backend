@@ -1,22 +1,26 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-const loanPaymentSchema = new mongoose.Schema({
-  paymentDate: {
-    type: Date,
-    required: true,
-    default: Date.now, // Default to the current date
+const loanPaymentSchema = new mongoose.Schema(
+  {
+    paymentDate: {
+      type: Date,
+      required: true,
+      // default: Date.now, // Default to the current date
+    },
+    loanId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Loan", // Reference the Loan collection
+      required: true,
+    },
+    amount: {
+      type: Number,
+      required: true,
+      min: 0, // Ensure no negative amounts
+    },
   },
-  loanNumber: {
-    type: String,
-    required: true,
-  },
-  amount: {
-    type: Number,
-    required: true,
-    min: 0, // Ensure no negative amounts
-  },
-}, {
-  timestamps: true, // Automatically manage `createdAt` and `updatedAt` fields
-});
+  {
+    timestamps: true, // Automatically manage `createdAt` and `updatedAt` fields
+  }
+);
 
-module.exports = mongoose.model('LoanPayment', loanPaymentSchema);
+module.exports = mongoose.model("LoanPayment", loanPaymentSchema);

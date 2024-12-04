@@ -9,11 +9,8 @@ const dependantController=require("./controllers/dependentController")
 const paymentController = require('./controllers/paymentController');
 const loanController = require('./controllers/loanController');
 const loanPaymentController = require('./controllers/loanPaymentController');
+const loanInterestPaymentController = require("./controllers/loanInterestPaymentController");
 
-// router.get("/users", userController.getUsers);
-// router.post("/createuser", userController.addUser);
-// router.post("/updateuser", userController.updateUser);
-// router.post("/deleteuser", userController.deleteUser);
 
 router.get("/getAllMembers", memberController.getAllMembers);
 router.post("/createMember", memberController.createMember);
@@ -38,14 +35,25 @@ router.delete('/payments/:id', paymentController.deletePayment);
 router.post('/loan', loanController.createLoan);
 router.get('/loans', loanController.getAllLoans);
 router.get('/loans/member/:memberId', loanController.getLoansByMemberId);
-router.get('/loans/:id', loanController.getLoanById);
-router.put('/loans/:id', loanController.updateLoan);
-router.delete('/loans/:id', loanController.deleteLoan);
+router.get('/loan/:id', loanController.getLoanById);
+router.put('/loan/:id', loanController.updateLoan);
+router.delete('/loan/:id', loanController.deleteLoan);
 
 router.post('/loan-payment', loanPaymentController.createLoanPayment);
 router.get('/loan-payments', loanPaymentController.getAllLoanPayments);
-router.get('/loan-payments/loan/:loanNumber', loanPaymentController.getPaymentsByLoanNumber);
-router.put('/loan-payments/:id', loanPaymentController.updateLoanPayment);
-router.delete('/loan-payments/:id', loanPaymentController.deleteLoanPayment);
+router.get('/loan-payments/loan/:loanId', loanPaymentController.getPaymentsByLoanId);
+router.put('/loan-payment/:id', loanPaymentController.updateLoanPayment);
+router.delete('/loan-payment/:id', loanPaymentController.deleteLoanPayment);
+
+
+
+// Routes for loan interest payments
+router.post("/loan-interest-payment", loanInterestPaymentController.createLoanInterestPayment);
+router.get("/loan-interest-payment", loanInterestPaymentController.getAllLoanInterestPayments);
+router.get("/loan-interest-payment/loan/:loanId", loanInterestPaymentController.getPaymentsByLoanId);
+router.get("/loan-interest-payment/last/:loanId", loanInterestPaymentController.getLastLoanInterestPaymentDate);
+router.put("/loan-interest-payment/:id", loanInterestPaymentController.updateLoanInterestPayment);
+router.delete("/loan-interest-payment/:id", loanInterestPaymentController.deleteLoanInterestPayment);
+
 
 module.exports = router;
