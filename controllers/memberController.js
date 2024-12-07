@@ -60,25 +60,38 @@ exports.createMember = async (req, res) => {
   }
 };
 
-// Retrieve all members
+// Retrieve all members without sending the password field
 exports.getAllMembers = async (req, res) => {
   try {
-    const members = await Member.find();
+    const members = await Member.find().select('-password');  // Excludes the password field
     res.status(200).json({ success: true, data: members });
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Error fetching members.",
-        error: error.message,
-      });
+    res.status(500).json({
+      success: false,
+      message: "Error fetching members.",
+      error: error.message,
+    });
   }
 };
 
+exports.getAllMembersBasicInfo= async(req, res)=>{
+try {
+  
+  const membersBasicInfo = await  Member.find().select('name area member_id mob_tel res_tel ');  // Excludes the password field and include required
+  res.status(200).json({ success: true, membersBasicInfo: membersBasicInfo });
+} catch (error) {
+  res.status(500).json({
+    success: false,
+    message: "Error fetching members.",
+    error: error.message,
+  });
+  
+}
+}
+
 // Retrieve a single member by `member_id`
 exports.getMemberById = async (req, res) => {
-  // console.log(req.body)
+  console.log(req.body)
   try {
     const { member_id } = req.query;
     // console.log(member_id);

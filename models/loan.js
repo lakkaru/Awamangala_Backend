@@ -7,6 +7,16 @@ const loanSchema = new mongoose.Schema(
       ref: 'Member', // Assuming you have a Member model
       required: true,
     },
+    guarantor1Id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Member', // Assuming you have a Member model
+      required: true,
+    },
+    guarantor2Id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Member', // Assuming you have a Member model
+      required: true,
+    },
     loanNumber: {
       type: String,
       required: true,
@@ -16,10 +26,15 @@ const loanSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    loanRemainingAmount: {
+      type: Number,
+      // required: true,
+      default:10000
+    },
     loanDate: {
       type: Date,
       required: true,
-      default: Date.now,
+      // default: Date.now,
     },
   },
   {

@@ -55,7 +55,7 @@ exports.getPaymentsByLoanId = async (req, res) => {
   // console.log(req.params)
   try {
     const { loanId } = req.params;
-
+// console.log('loanPayment ' ,loanId)
     if (!loanId) {
       return res.status(400).json({ message: "Loan ID is required." });
     }

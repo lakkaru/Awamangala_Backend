@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const loanPaymentSchema = new mongoose.Schema(
+const penaltyInterestPaymentSchema = new mongoose.Schema(
   {
     date: {
       type: Date,
@@ -23,4 +23,4 @@ const loanPaymentSchema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model("LoanPayment", loanPaymentSchema);
+module.exports = mongoose.model("PenaltyPayment", penaltyInterestPaymentSchema);

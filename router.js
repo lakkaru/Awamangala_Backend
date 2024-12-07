@@ -10,9 +10,12 @@ const paymentController = require('./controllers/paymentController');
 const loanController = require('./controllers/loanController');
 const loanPaymentController = require('./controllers/loanPaymentController');
 const loanInterestPaymentController = require("./controllers/loanInterestPaymentController");
+const penaltyInterestPayment = require("./controllers/penaltyInterestPaymentController");
+const fullPayments = require("./controllers/fullPaymentController");
 
 
 router.get("/getAllMembers", memberController.getAllMembers);
+router.get("/getMembersInfo", memberController.getAllMembersBasicInfo);
 router.post("/createMember", memberController.createMember);
 router.get("/getMemberById", memberController.getMemberById);
 router.post("/updateMember", memberController.updateMember);
@@ -54,6 +57,16 @@ router.get("/loan-interest-payment/loan/:loanId", loanInterestPaymentController.
 router.get("/loan-interest-payment/last/:loanId", loanInterestPaymentController.getLastLoanInterestPaymentDate);
 router.put("/loan-interest-payment/:id", loanInterestPaymentController.updateLoanInterestPayment);
 router.delete("/loan-interest-payment/:id", loanInterestPaymentController.deleteLoanInterestPayment);
+
+// Routes for penalty interest payments
+router.post("/penalty-interest-payment", penaltyInterestPayment.createPenaltyInterestPayment);
+router.get("/penalty-interest-payment", penaltyInterestPayment.getAllPenaltyInterestPayment);
+router.get("/penalty-interest-payment/loan/:loanId", penaltyInterestPayment.getPenaltyInterestPaymentByLoanId);
+router.get("/penalty-interest-payment/last/:loanId", penaltyInterestPayment.getLastPenaltyInterestPaymentDate);
+router.put("/penalty-interest-payment/:id", penaltyInterestPayment.updatePenaltyInterestPayment);
+router.delete("/penalty-interest-payment/:id", penaltyInterestPayment.deletePenaltyInterestPayment);
+
+router.get("/loan-all-payments/:loanId", fullPayments.getAllPayments);
 
 
 module.exports = router;
