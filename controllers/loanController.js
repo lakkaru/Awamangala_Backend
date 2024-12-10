@@ -52,6 +52,7 @@ exports.getAllLoans = async (req, res) => {
 
 // Get last loan by memberId
 exports.getLoansByMemberId = async (req, res) => {
+  // console.log('Member: ',req.params)
   try {
     const { memberId } = req.params;
     // console.log(memberId)
@@ -88,6 +89,7 @@ exports.getLoanById = async (req, res) => {
 
 // Update loanRemainingAmount by ID
 exports.updateLoan = async (req, res) => {
+  console.log(req.body)
   try {
     const { id } = req.params;
     const { loanRemainingAmount } = req.body;

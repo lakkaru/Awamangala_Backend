@@ -4,7 +4,7 @@ const Loan = require("../models/loan"); // Loan model
 // Create a new loan interest payment
 exports.createPenaltyInterestPayment = async (req, res) => {
   try {
-    const { loanId, amount, paymentDate } = req.body;
+    const { loanId, amount, date } = req.body;
 
     if (!loanId || !amount) {
       return res
@@ -24,7 +24,7 @@ exports.createPenaltyInterestPayment = async (req, res) => {
     const newPayment = new PenaltyInterestPayment({
       loanId, // Use loanId directly
       amount,
-      date:paymentDate
+      date:date
     });
 
     const savedPayment = await newPayment.save();

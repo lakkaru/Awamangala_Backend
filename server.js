@@ -10,6 +10,7 @@ app.use(cors()); // allow cross origin access
 // app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+
 //Mongodb connection uri
 const uri =
 //   "mongodb+srv://lakkaru:Mo61633583@societies.idzobxr.mongodb.net/?retryWrites=true&w=majority&appName=societies";

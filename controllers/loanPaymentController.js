@@ -2,7 +2,7 @@ const LoanPayment = require("../models/loanPayment");
 
 exports.createLoanPayment = async (req, res) => {
   try {
-    const { loanId, amount, paymentDate } = req.body;
+    const { loanId, amount, date } = req.body;
     // console.log(loanId, amount, paymentDate )
     if (!loanId) {
       return res
@@ -13,7 +13,7 @@ exports.createLoanPayment = async (req, res) => {
     const newPayment = new LoanPayment({
       loanId, // Store the loan's ObjectId
       amount,
-      paymentDate, 
+      date, 
     });
     // console.log('newPayment  ' , newPayment)
     const savedPayment = await newPayment.save();

@@ -35,6 +35,8 @@ router.get('/payments/:id', paymentController.getPaymentById);
 router.put('/payments/:id', paymentController.updatePayment);
 router.delete('/payments/:id', paymentController.deletePayment);
 
+
+//loans
 router.post('/loan', loanController.createLoan);
 router.get('/loans', loanController.getAllLoans);
 router.get('/loans/member/:memberId', loanController.getLoansByMemberId);
@@ -42,6 +44,7 @@ router.get('/loan/:id', loanController.getLoanById);
 router.put('/loan/:id', loanController.updateLoan);
 router.delete('/loan/:id', loanController.deleteLoan);
 
+//loan principle payment
 router.post('/loan-payment', loanPaymentController.createLoanPayment);
 router.get('/loan-payments', loanPaymentController.getAllLoanPayments);
 router.get('/loan-payments/loan/:loanId', loanPaymentController.getPaymentsByLoanId);
@@ -66,7 +69,9 @@ router.get("/penalty-interest-payment/last/:loanId", penaltyInterestPayment.getL
 router.put("/penalty-interest-payment/:id", penaltyInterestPayment.updatePenaltyInterestPayment);
 router.delete("/penalty-interest-payment/:id", penaltyInterestPayment.deletePenaltyInterestPayment);
 
-router.get("/loan-all-payments/:loanId", fullPayments.getAllPayments);
+router.get("/loan-all-payments/:loanId", fullPayments.getLoanAllPayments);
+router.get("/period-all-payments", fullPayments.getPaymentsByPeriod);
+router.get("/period-all-loans", fullPayments.getAllExpenses);
 
 
 module.exports = router;
