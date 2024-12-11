@@ -42,6 +42,7 @@ router.get('/loans', loanController.getAllLoans);
 router.get('/loans/member/:memberId', loanController.getLoansByMemberId);
 router.get('/loan/:id', loanController.getLoanById);
 router.put('/loan/:id', loanController.updateLoan);
+router.get('/due-loans', loanController.getDueLoans);
 router.delete('/loan/:id', loanController.deleteLoan);
 
 //loan principle payment

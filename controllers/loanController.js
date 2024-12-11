@@ -89,7 +89,7 @@ exports.getLoanById = async (req, res) => {
 
 // Update loanRemainingAmount by ID
 exports.updateLoan = async (req, res) => {
-  console.log(req.body)
+  // console.log(req.body)
   try {
     const { id } = req.params;
     const { loanRemainingAmount } = req.body;
@@ -111,6 +111,40 @@ exports.updateLoan = async (req, res) => {
       .json({ message: "Error updating loan", error: error.message });
   }
 };
+
+
+// Getting all loans due for more than 10 months and with a remaining amount
+exports.getDueLoans = async (req, res) => {
+  try {
+    // Get the current date
+    const currentDate = new Date();
+
+    // Calculate the date 10 months ago
+    const tenMonthsAgo = new Date();
+    tenMonthsAgo.setMonth(currentDate.getMonth() - 10);
+
+    // Query loans where loanDate is older than 10 months and loanRemainingAmount > 0
+    const dueLoans = await Loan.find({
+      loanDate: { $lte: tenMonthsAgo },
+      loanRemainingAmount: { $gt: 0 },
+    })
+      .populate("memberId", "name member_id") // Populate `memberId` and include only `name`
+      .sort({ loanDate: 1 }); // Sort in ascending order by loanDate
+
+    if (dueLoans.length === 0) {
+      return res.status(200).json({ message: "No due loans found with a remaining balance." });
+    }
+
+    res.status(200).json(dueLoans);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error retrieving due loans", error: error.message });
+  }
+};
+
+
+
 
 // Delete loan by ID
 exports.deleteLoan = async (req, res) => {
