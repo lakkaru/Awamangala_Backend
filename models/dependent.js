@@ -4,12 +4,12 @@ const Schema = mongoose.Schema;
 
 const DependentSchema = new Schema({
   id: {
-    type: Number,
+    type: String,
     required: true,
     unique: true, // Ensures no duplicate entries for `id`
   },
   member_id: {
-    type: Number,
+    type: Object,
     required: true,
   },
   name: {

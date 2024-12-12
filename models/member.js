@@ -5,7 +5,7 @@ const Schema = mongoose.Schema;
 const MemberSchema = new Schema(
   {
     member_id: {
-      type: String,
+      type: Number,
       required: true,
       unique: true, // Ensure member IDs are unique
       index: true,  // Add an index for faster lookup

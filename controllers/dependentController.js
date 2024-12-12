@@ -47,8 +47,9 @@ exports.getAllDependents = async (req, res) => {
 // Get a single dependent by ID
 exports.getDependentsById = async (req, res) => {
   try {
+    console.log(req.params)
     const { member_id } = req.params;
-    // console.log(member_id)
+    console.log(member_id)
     const dependents = await Dependent.find({ member_id: member_id });
 
     if (!dependents) {

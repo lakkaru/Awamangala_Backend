@@ -18,9 +18,13 @@ router.get("/getAllMembers", memberController.getAllMembers);
 router.get("/getMembersInfo", memberController.getAllMembersBasicInfo);
 router.post("/createMember", memberController.createMember);
 router.get("/getMemberById", memberController.getMemberById);
+
+router.get("/getMemberAllById", memberController.getMemberAllById);
+router.get("/getMemberAllByArea", memberController.getMemberAllByArea);
+
 router.post("/updateMember", memberController.updateMember);
 router.post("/deleteMember", memberController.deleteMember);
-// router.post("/clearPasswords", memberController.clearPasswords);
+// router.get("/updateDep", memberController.updateDependants);
 
 router.post("/dependent", dependantController.createDependent);
 router.get("/dependents", dependantController.getAllDependents);
