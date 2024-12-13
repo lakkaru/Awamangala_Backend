@@ -120,7 +120,7 @@ exports.getMemberAllById = async (req, res) => {
     // console.log('Get Dependents')
 
     const member = await Member.find({ member_id: member_id }).select('member_id name area mob_tel res_tel');
-    console.log(member[0]._id)
+    // console.log(member[0]._id)
     if (member) {
       const dependents = await Dependant.find({ member_id: member[0]._id }).select('name relationship');
       res.status(200).json({ success: true,  member:member, dependents: dependents });
