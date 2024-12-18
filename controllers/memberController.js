@@ -4,14 +4,42 @@ const mongoose = require("mongoose");
 const Member = require("../models/member"); // Import the Member model
 const Dependent = require("../models/dependent");
 
-// Create a new member
+// Get next member ID
+exports.getNextId = async (req, res) => {
+  try {
+    // Find the member with the highest member_id
+    const highestMember = await Member.findOne({})
+      .sort({ member_id: -1 }) // Sort by member_id in descending order
+      .select("member_id"); // Only select the member_id field
+
+    // Determine the next member_id
+    const nextMemberId = highestMember ? highestMember.member_id + 1 : 1;
+
+    res.status(200).json({
+      success: true,
+      nextMemberId,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Error getting next memberId.",
+      error: error.message,
+    });
+  }
+};
+
+
+
+// Create a new member and dependents
 exports.createMember = async (req, res) => {
+  console.log(req.body);
+  let newlyAddedMember = {};
   try {
     const {
       member_id,
-      password,
       name,
       area,
+      password,
       res_tel,
       mob_tel,
       address,
@@ -19,21 +47,22 @@ exports.createMember = async (req, res) => {
       nic,
       birthday,
     } = req.body;
+    const { dependents } = req.body;
 
     // Validate required fields
-    if (!member_id || !password || !name) {
+    if (!member_id || !area || !name) {
       return res.status(400).json({
         success: false,
-        message: "Member ID, password, and name are required.",
+        message: "Member ID, area, and name are required.",
       });
     }
 
     // Create and save the new member
     const newMember = new Member({
       member_id,
-      password,
       name,
       area,
+      password,
       res_tel,
       mob_tel,
       address,
@@ -42,13 +71,74 @@ exports.createMember = async (req, res) => {
       birthday,
     });
 
-    await newMember.save();
-    res.status(201).json({
+    await newMember.save()
+      .then((member) => {
+        newlyAddedMember = member;
+      })
+      .catch((error) => {
+        console.error("Error saving member:", error);
+        return res.status(500).json({
+          success: false,
+          message: "Error saving member.",
+          error: error.message,
+        });
+      });
+
+    // Collect the IDs of saved dependents
+    const dependentIds = [];
+
+    // Create and save dependents
+    if (dependents && dependents.length > 0) {
+      for (const dependent of dependents) {
+        if (dependent.name !== "") {
+          const newDependent = new Dependent({
+            name: dependent.name,
+            relationship: dependent.relationship,
+            nic: dependent.nic,
+            birthday: dependent.birthday,
+            member_id: newlyAddedMember._id, // Link dependent to the newly added member
+          });
+
+          await newDependent.save()
+            .then((savedDependent) => {
+              console.log("Dependent saved successfully:", savedDependent);
+              dependentIds.push(savedDependent._id); // Collect dependent IDs
+            })
+            .catch((error) => {
+              console.error("Error saving dependent:", error);
+              return res.status(500).json({
+                success: false,
+                message: "Error saving dependent.",
+                error: error.message,
+              });
+            });
+        }
+      }
+    }
+
+    // Update the member document with the dependents' IDs
+    newlyAddedMember.dependents = dependentIds;
+    await newlyAddedMember.save()
+      .then(() => {
+        console.log("Member updated with dependents successfully.");
+      })
+      .catch((error) => {
+        console.error("Error updating member with dependents:", error);
+        return res.status(500).json({
+          success: false,
+          message: "Error updating member with dependents.",
+          error: error.message,
+        });
+      });
+
+
+    res.status(200).json({
       success: true,
-      message: "Member created successfully.",
-      data: newMember,
+      message: "Member and dependents created successfully.",
+      member: newlyAddedMember,
     });
   } catch (error) {
+    console.error("Error in createMember:", error);
     res.status(500).json({
       success: false,
       message: "Error creating member.",
@@ -56,6 +146,9 @@ exports.createMember = async (req, res) => {
     });
   }
 };
+
+
+
 
 // Retrieve all members without sending the password field
 exports.getAllMembers = async (req, res) => {
@@ -111,7 +204,6 @@ exports.getMemberById = async (req, res) => {
   }
 };
 
-
 //Get member full details
 exports.getMemberAllById = async (req, res) => {
   const { member_id } = req.query;
@@ -119,11 +211,19 @@ exports.getMemberAllById = async (req, res) => {
   try {
     // console.log('Get Dependents')
 
-    const member = await Member.find({ member_id: member_id }).select('member_id name area mob_tel res_tel');
+    const member = await Member.findOne({ member_id: member_id }).select('name mob_tel res_tel area').populate('dependents');
+    // const member = await Member.findOne({ member_id: member_id });  // Populate dependents
     // console.log(member[0]._id)
     if (member) {
-      const dependents = await Dependent.find({ member_id: member[0]._id }).select('name relationship');
-      res.status(200).json({ success: true,  member:member, dependents: dependents });
+      // console.log(member)
+      // console.log(member.dependents)
+      // const dependents = await Dependent.find({
+      //   member_id: member[0]._id,
+      // }).select("name relationship");
+      res
+        .status(200)
+        .json({ success: true, member: member, dependents: member.dependents });
+      
     }
   } catch (error) {
     res.status(500).json({
@@ -139,30 +239,59 @@ exports.getFamilyRegisterById = async (req, res) => {
   const { member_id } = req.query;
 
   try {
-    // Fetch the member details
-    const member = await Member.find({ member_id }).select("name _id dateOfDeath");
+//     // Fetch the member details
+//     const member = await Member.findOne({ member_id: member_id }).select(
+//       "name _id dateOfDeath"
+//     ).populate('dependents');
+// // console.log(member)
 
-    // If no member is found, return an appropriate error response
-    if (!member || member.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "Member not found.",
-      });
-    }
+//     // If no member is found, return an appropriate error response
+//     if (!member ) {
+//       return res.status(404).json({
+//         success: false,
+//         message: "Member not found.",
+//       });
+//     }
+const member = await Member.findOne({ member_id: member_id })
+  .select("name _id dateOfDeath")
+  .populate("dependents");
+
+if (!member) {
+  throw new Error("Member not found");
+}
+
+// Add "relationship": "member" to the member object
+const memberWithRelationship = {
+  ...member.toObject(), // Convert Mongoose document to plain JS object
+  relationship: "සාමාජික",
+};
+
+// // Create a new array with the member object and dependents
+// const dependentsWithRelationship = member.dependents.map((dependent) => ({
+//   ...dependent.toObject(),
+//   relationship: "dependent",
+// }));
+
+const FamilyRegister = [memberWithRelationship, ...member.dependents];
+
+console.log(FamilyRegister);
 
     // Add "relationship: 'member'" to the first member object
-    member[0] = { ...member[0]._doc, relationship: "සාමාජික" };
+    // member = { ...member, relationship: "සාමාජික" };
+    // console.log(member)
 
     // Fetch dependents for the member
-    const dependents = await Dependent.find({ member_id: member[0]._id }).select("name relationship _id dateOfDeath");
-
+    // const dependents = await Dependent.find({
+    //   member_id: member._id,
+    // }).select("name relationship _id dateOfDeath");
+// const dependents=member._doc.dependents
     // Add the member to the beginning of the dependents array
-    dependents.unshift(member[0]);
+    // dependents.unshift(member);
 
     // Return the response with member and dependents
     res.status(200).json({
       success: true,
-      FamilyRegister: dependents,
+      FamilyRegister,
     });
   } catch (error) {
     // Handle server errors
@@ -174,19 +303,18 @@ exports.getFamilyRegisterById = async (req, res) => {
   }
 };
 
-
 //Get area full details
 exports.getMemberAllByArea = async (req, res) => {
-  const { area } = req.query;
-  // console.log(area)
-  try {
-    // console.log('Get Dependents')
+  // console.log("first");
+  const { area } = req.query; // Extract the query parameter
+  console.log(area); // Log the area to check the value
 
-    const members = await Member.find({ area: area }).select('member_id name area mob_tel res_tel').sort('member_id');
-    // console.log(members)
-    
-      res.status(200).json({ success: true,  members:members });
-    
+  try {
+    const members = await Member.find({ area: area })
+      .select("member_id name area mob_tel res_tel")
+      .sort("member_id");
+
+    res.status(200).json({ success: true, members: members });
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -196,12 +324,10 @@ exports.getMemberAllByArea = async (req, res) => {
   }
 };
 
-
-
 //update the member date of death
 exports.updateDiedStatus = async (req, res) => {
   const { _id, dateOfDeath } = req.body;
-console.log(req.body)
+  // console.log(req.body)
   // Input validation
   // if (typeof member_id !== "number") {
   //   return res.status(400).json({
@@ -210,17 +336,20 @@ console.log(req.body)
   //   });
   // }
 
- // Convert dateOfDeath to a Date object
-const parsedDateOfDeath = new Date(dateOfDeath);
+  // Convert dateOfDeath to a Date object
+  const parsedDateOfDeath = new Date(dateOfDeath);
 
-// Check if the conversion results in a valid Date object
-if (!(parsedDateOfDeath instanceof Date) || isNaN(parsedDateOfDeath.getTime())) {
-  return res.status(400).json({
-    success: false,
-    message: "Invalid or missing 'dateOfDeath'. It must be a valid Date object.",
-  });
-}
-  
+  // Check if the conversion results in a valid Date object
+  if (
+    !(parsedDateOfDeath instanceof Date) ||
+    isNaN(parsedDateOfDeath.getTime())
+  ) {
+    return res.status(400).json({
+      success: false,
+      message:
+        "Invalid or missing 'dateOfDeath'. It must be a valid Date object.",
+    });
+  }
 
   try {
     // Use Mongoose's `findOneAndUpdate` to update the died status
@@ -257,7 +386,7 @@ if (!(parsedDateOfDeath instanceof Date) || isNaN(parsedDateOfDeath.getTime())) 
 //update the Dependent death
 exports.updateDependentDiedStatus = async (req, res) => {
   const { _id, dateOfDeath } = req.body;
-console.log(req.body)
+  // console.log(req.body)
   // Input validation
   // if (typeof member_id !== "number") {
   //   return res.status(400).json({
@@ -267,15 +396,19 @@ console.log(req.body)
   // }
 
   // Convert dateOfDeath to a Date object
-const parsedDateOfDeath = new Date(dateOfDeath);
+  const parsedDateOfDeath = new Date(dateOfDeath);
 
-// Check if the conversion results in a valid Date object
-if (!(parsedDateOfDeath instanceof Date) || isNaN(parsedDateOfDeath.getTime())) {
-  return res.status(400).json({
-    success: false,
-    message: "Invalid or missing 'dateOfDeath'. It must be a valid Date object.",
-  });
-}
+  // Check if the conversion results in a valid Date object
+  if (
+    !(parsedDateOfDeath instanceof Date) ||
+    isNaN(parsedDateOfDeath.getTime())
+  ) {
+    return res.status(400).json({
+      success: false,
+      message:
+        "Invalid or missing 'dateOfDeath'. It must be a valid Date object.",
+    });
+  }
 
   try {
     // Use Mongoose's `findOneAndUpdate` to update the died status
@@ -308,7 +441,6 @@ if (!(parsedDateOfDeath instanceof Date) || isNaN(parsedDateOfDeath.getTime())) 
     });
   }
 };
-
 
 // Update a member
 exports.updateMember = async (req, res) => {

@@ -15,12 +15,17 @@ const fullPayments = require("./controllers/fullPaymentController");
 
 router.get("/getAllMembers", memberController.getAllMembers);
 router.get("/getMembersInfo", memberController.getAllMembersBasicInfo);
-router.post("/createMember", memberController.createMember);
+
 router.get("/getMemberById", memberController.getMemberById);
 
 router.get("/getMemberAllById", memberController.getMemberAllById);
 router.get("/getFamilyRegister", memberController.getFamilyRegisterById);
+
 router.get("/getMemberAllByArea", memberController.getMemberAllByArea);
+
+router.get("/member/getNextId", memberController.getNextId);
+// router.get("/member/removeFields", memberController.removeFields);
+router.post("/createMember", memberController.createMember);
 
 router.post("/updateMember", memberController.updateMember);
 router.post("/updateDiedStatus", memberController.updateDiedStatus);

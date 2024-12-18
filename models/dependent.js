@@ -4,15 +4,12 @@ const Schema = mongoose.Schema;
 
 const DependentSchema = new Schema(
   {
-    id: {
-      type: String,
-      required: true,
-      unique: true, // Ensures no duplicate entries for `id`
-    },
-    member_id: {
-      type: Object,
-      required: true,
-    },
+  
+    // member_id: {
+    //   type: mongoose.Schema.Types.ObjectId,
+    //   ref: "Member", // Assuming you have a Member model
+    //   required: true,
+    // },
     name: {
       type: String,
       required: true,
@@ -32,11 +29,11 @@ const DependentSchema = new Schema(
       default: null, // Allows `NULL` values
       trim: true,
     },
-    image: {
-      type: String,
-      default: null, // Allows `NULL` values
-      trim: true,
-    },
+    // image: {
+    //   type: String,
+    //   default: null, // Allows `NULL` values
+    //   trim: true,
+    // },
     dateOfDeath: {
       type: Date,
       // default: Date.now, // Default to the current date

@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const bcrypt = require("bcrypt");
 
 const Schema = mongoose.Schema;
 
@@ -8,11 +9,11 @@ const MemberSchema = new Schema(
       type: Number,
       required: true,
       unique: true, // Ensure member IDs are unique
-      index: true,  // Add an index for faster lookup
+      index: true, // Add an index for faster lookup
     },
     password: {
       type: String,
-      required: true, // Ensure passwords are provided (optional depending on your use case)
+      required: true, // Ensure passwords are provided
     },
     name: {
       type: String,
@@ -55,13 +56,38 @@ const MemberSchema = new Schema(
     },
     dateOfDeath: {
       type: Date,
-      // default: Date.now, // Default to the current date
+    },
+    dependents: {
+      type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Dependent' }],
     },
   },
   {
     timestamps: { createdAt: "created_at", updatedAt: "updated_at" }, // Auto-manage created_at and updated_at fields
   }
 );
+
+// Add a pre-save hook to set the default password and hash it
+MemberSchema.pre("save", async function (next) {
+  try {
+    if (!this.password) {
+      // Log the situation if no password is set
+      console.log("No password provided, setting default password");
+      this.password = this.member_id.toString();
+    }
+
+    if (this.isModified("password")) {
+      const salt = await bcrypt.genSalt(10);
+      this.password = await bcrypt.hash(this.password, salt);
+    }
+
+    console.log("Password set to:", this.password);  // Ensure password is set before saving
+    next();
+  } catch (error) {
+    console.error("Error in pre-save:", error);
+    next(error);
+  }
+});
+
 
 // Add additional indexes
 MemberSchema.index({ email: 1 });
@@ -70,3 +96,4 @@ MemberSchema.index({ name: 1 });
 const Member = mongoose.model("Member", MemberSchema);
 
 module.exports = Member;
+
