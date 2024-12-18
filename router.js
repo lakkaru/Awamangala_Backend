@@ -19,9 +19,12 @@ router.post("/createMember", memberController.createMember);
 router.get("/getMemberById", memberController.getMemberById);
 
 router.get("/getMemberAllById", memberController.getMemberAllById);
+router.get("/getFamilyRegister", memberController.getFamilyRegisterById);
 router.get("/getMemberAllByArea", memberController.getMemberAllByArea);
 
 router.post("/updateMember", memberController.updateMember);
+router.post("/updateDiedStatus", memberController.updateDiedStatus);
+router.post("/updateDependentDiedStatus", memberController.updateDependentDiedStatus);
 router.post("/deleteMember", memberController.deleteMember);
 // router.get("/updateDep", memberController.updateDependants);
 

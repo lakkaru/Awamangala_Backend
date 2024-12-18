@@ -9,7 +9,7 @@ const FinePaymentAccountSchema = new mongoose.Schema(
     },
     memberId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Member", // Reference the Loan collection
+      ref: "Member", // Reference the Member collection
       required: true,
     },
     amount: {

@@ -6,6 +6,7 @@ const mongoose = require("mongoose");
 
 const router = require("./router");
 
+
 app.use(cors()); // allow cross origin access
 // app.use(express.urlencoded({ extended: true }));
 app.use(express.json());

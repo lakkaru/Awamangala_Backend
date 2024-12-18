@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 // const { response } = require("../app");
 const Member = require("../models/member"); // Import the Member model
-const Dependant = require("../models/dependent");
+const Dependent = require("../models/dependent");
 
 // Create a new member
 exports.createMember = async (req, res) => {
@@ -122,13 +122,53 @@ exports.getMemberAllById = async (req, res) => {
     const member = await Member.find({ member_id: member_id }).select('member_id name area mob_tel res_tel');
     // console.log(member[0]._id)
     if (member) {
-      const dependents = await Dependant.find({ member_id: member[0]._id }).select('name relationship');
+      const dependents = await Dependent.find({ member_id: member[0]._id }).select('name relationship');
       res.status(200).json({ success: true,  member:member, dependents: dependents });
     }
   } catch (error) {
     res.status(500).json({
       success: false,
       message: "Error fetching dependents.",
+      error: error.message,
+    });
+  }
+};
+
+//get family register
+exports.getFamilyRegisterById = async (req, res) => {
+  const { member_id } = req.query;
+
+  try {
+    // Fetch the member details
+    const member = await Member.find({ member_id }).select("name _id dateOfDeath");
+
+    // If no member is found, return an appropriate error response
+    if (!member || member.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Member not found.",
+      });
+    }
+
+    // Add "relationship: 'member'" to the first member object
+    member[0] = { ...member[0]._doc, relationship: "සාමාජික" };
+
+    // Fetch dependents for the member
+    const dependents = await Dependent.find({ member_id: member[0]._id }).select("name relationship _id dateOfDeath");
+
+    // Add the member to the beginning of the dependents array
+    dependents.unshift(member[0]);
+
+    // Return the response with member and dependents
+    res.status(200).json({
+      success: true,
+      FamilyRegister: dependents,
+    });
+  } catch (error) {
+    // Handle server errors
+    res.status(500).json({
+      success: false,
+      message: "Error fetching member details.",
       error: error.message,
     });
   }
@@ -155,6 +195,120 @@ exports.getMemberAllByArea = async (req, res) => {
     });
   }
 };
+
+
+
+//update the member date of death
+exports.updateDiedStatus = async (req, res) => {
+  const { _id, dateOfDeath } = req.body;
+console.log(req.body)
+  // Input validation
+  // if (typeof member_id !== "number") {
+  //   return res.status(400).json({
+  //     success: false,
+  //     message: "Invalid or missing member_id. It must be a number.",
+  //   });
+  // }
+
+ // Convert dateOfDeath to a Date object
+const parsedDateOfDeath = new Date(dateOfDeath);
+
+// Check if the conversion results in a valid Date object
+if (!(parsedDateOfDeath instanceof Date) || isNaN(parsedDateOfDeath.getTime())) {
+  return res.status(400).json({
+    success: false,
+    message: "Invalid or missing 'dateOfDeath'. It must be a valid Date object.",
+  });
+}
+  
+
+  try {
+    // Use Mongoose's `findOneAndUpdate` to update the died status
+    const updatedMember = await Member.findOneAndUpdate(
+      { _id }, // Filter condition
+      { $set: { dateOfDeath } }, // Update the `died` field
+      { new: true, runValidators: true } // Return the updated document and run validators
+    );
+
+    // If no member is found, return a 404 error
+    if (!updatedMember) {
+      return res.status(404).json({
+        success: false,
+        message: "Member not found.",
+      });
+    }
+
+    // Respond with the updated member
+    res.status(200).json({
+      success: true,
+      message: "Died status updated successfully.",
+      member: updatedMember,
+    });
+  } catch (error) {
+    // Handle any server or database errors
+    res.status(500).json({
+      success: false,
+      message: "Error updating died status.",
+      error: error.message,
+    });
+  }
+};
+
+//update the Dependent death
+exports.updateDependentDiedStatus = async (req, res) => {
+  const { _id, dateOfDeath } = req.body;
+console.log(req.body)
+  // Input validation
+  // if (typeof member_id !== "number") {
+  //   return res.status(400).json({
+  //     success: false,
+  //     message: "Invalid or missing member_id. It must be a number.",
+  //   });
+  // }
+
+  // Convert dateOfDeath to a Date object
+const parsedDateOfDeath = new Date(dateOfDeath);
+
+// Check if the conversion results in a valid Date object
+if (!(parsedDateOfDeath instanceof Date) || isNaN(parsedDateOfDeath.getTime())) {
+  return res.status(400).json({
+    success: false,
+    message: "Invalid or missing 'dateOfDeath'. It must be a valid Date object.",
+  });
+}
+
+  try {
+    // Use Mongoose's `findOneAndUpdate` to update the died status
+    const updatedDependent = await Dependent.findOneAndUpdate(
+      { _id }, // Filter condition
+      { $set: { dateOfDeath } }, // Update the `died` field
+      { new: true, runValidators: true } // Return the updated document and run validators
+    );
+
+    // If no dependent is found, return a 404 error
+    if (!updatedDependent) {
+      return res.status(404).json({
+        success: false,
+        message: "Member not found.",
+      });
+    }
+
+    // Respond with the updated dependent
+    res.status(200).json({
+      success: true,
+      message: "Died status updated successfully.",
+      dependent: updatedDependent,
+    });
+  } catch (error) {
+    // Handle any server or database errors
+    res.status(500).json({
+      success: false,
+      message: "Error updating died status.",
+      error: error.message,
+    });
+  }
+};
+
 
 // Update a member
 exports.updateMember = async (req, res) => {

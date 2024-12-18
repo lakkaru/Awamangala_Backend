@@ -53,8 +53,9 @@ const MemberSchema = new Schema(
       type: Date,
       default: Date.now, // Default to the current date
     },
-    updated_date: {
+    dateOfDeath: {
       type: Date,
+      // default: Date.now, // Default to the current date
     },
   },
   {
