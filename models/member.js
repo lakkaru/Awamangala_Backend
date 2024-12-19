@@ -26,11 +26,11 @@ const MemberSchema = new Schema(
     },
     res_tel: {
       type: String,
-      match: /^[0-9]{10}$/, // Ensure valid 10-digit phone numbers
+      // match: /^[0-9]{10}$/, // Ensure valid 10-digit phone numbers
     },
     mob_tel: {
       type: String,
-      match: /^[0-9]{10}$/, // Ensure valid 10-digit mobile numbers
+      // match: /^[0-9]{10}$/, // Ensure valid 10-digit mobile numbers
     },
     address: {
       type: String,
@@ -40,12 +40,12 @@ const MemberSchema = new Schema(
       type: String,
       unique: true, // Ensure unique email addresses
       lowercase: true, // Convert emails to lowercase
-      match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, // Validate email format
+      // match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, // Validate email format
     },
     nic: {
       type: String,
       unique: true, // Ensure unique NIC numbers
-      match: /^[0-9]{9}[vVxX]$|^[0-9]{12}$/, // Validate NIC (Sri Lankan format)
+      // match: /^[0-9]{9}[vVxX]$|^[0-9]{12}$/, // Validate NIC (Sri Lankan format)
     },
     birthday: {
       type: Date,

@@ -211,7 +211,7 @@ exports.getMemberAllById = async (req, res) => {
   try {
     // console.log('Get Dependents')
 
-    const member = await Member.findOne({ member_id: member_id }).select('name mob_tel res_tel area').populate('dependents');
+    const member = await Member.findOne({ member_id: member_id }).select('-password').populate('dependents');
     // const member = await Member.findOne({ member_id: member_id });  // Populate dependents
     // console.log(member[0]._id)
     if (member) {
@@ -442,25 +442,66 @@ exports.updateDependentDiedStatus = async (req, res) => {
   }
 };
 
-// Update a member
+//update member and dependents
 exports.updateMember = async (req, res) => {
   try {
-    const { id } = req.params;
-    const updates = req.body;
+    const MemberNewData = req.body;
+    const _id = MemberNewData._id;
+    const dependents = MemberNewData.dependents;
 
-    const member = await Member.findByIdAndUpdate(id, updates, { new: true });
+    // First, update the member's data (excluding dependents)
+    // const member = await Member.findByIdAndUpdate(_id, MemberNewData, { new: true });
+    const member = await Member.findById(_id);
     if (!member) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Member not found." });
+      return res.status(404).json({ success: false, message: "Member not found." });
+    }
+console.log(member)
+    // Handle dependents update
+    if (dependents && dependents.length > 0) {
+      // First, delete the existing dependents for this member
+      await Dependent.deleteMany({ _id: { $in: member.dependents } });
+
+      // Create and save new dependents
+      const dependentIds = [];
+      for (const dependent of dependents) {
+        if (dependent.name !== "") {
+          const newDependent = new Dependent({
+            name: dependent.name,
+            relationship: dependent.relationship,
+            nic: dependent.nic,
+            birthday: dependent.birthday,
+          });
+
+          const savedDependent = await newDependent.save();
+          dependentIds.push(savedDependent._id); // Collect dependent ObjectId
+        }
+      }
+
+      // Update the member's dependents list with new dependent IDs (only ObjectId)
+      member.dependents = dependentIds;
+
+      // Save the member with the updated dependents
+      await member.save()
+        .then(() => {
+          console.log("Member updated with new dependents successfully.");
+        })
+        .catch((error) => {
+          console.error("Error updating member with dependents:", error);
+          return res.status(500).json({
+            success: false,
+            message: "Error updating member with dependents.",
+            error: error.message,
+          });
+        });
     }
 
     res.status(200).json({
       success: true,
-      message: "Member updated successfully.",
+      message: "Member and dependents updated successfully.",
       data: member,
     });
   } catch (error) {
+    console.error("Error updating member:", error);
     res.status(500).json({
       success: false,
       message: "Error updating member.",
@@ -468,6 +509,8 @@ exports.updateMember = async (req, res) => {
     });
   }
 };
+
+
 
 // Delete a member
 exports.deleteMember = async (req, res) => {

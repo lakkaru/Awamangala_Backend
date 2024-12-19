@@ -26,8 +26,8 @@ router.get("/getMemberAllByArea", memberController.getMemberAllByArea);
 router.get("/member/getNextId", memberController.getNextId);
 // router.get("/member/removeFields", memberController.removeFields);
 router.post("/createMember", memberController.createMember);
-
 router.post("/updateMember", memberController.updateMember);
+
 router.post("/updateDiedStatus", memberController.updateDiedStatus);
 router.post("/updateDependentDiedStatus", memberController.updateDependentDiedStatus);
 router.post("/deleteMember", memberController.deleteMember);
