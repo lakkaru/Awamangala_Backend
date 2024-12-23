@@ -22,6 +22,7 @@ router.get("/getMemberAllById", memberController.getMemberAllById);
 router.get("/getFamilyRegister", memberController.getFamilyRegisterById);
 
 router.get("/getMemberAllByArea", memberController.getMemberAllByArea);
+router.get("/getCurrentMemberIds", memberController.getCurrentMemberIds);
 
 router.get("/member/getNextId", memberController.getNextId);
 // router.get("/member/removeFields", memberController.removeFields);

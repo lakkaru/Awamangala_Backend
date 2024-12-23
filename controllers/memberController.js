@@ -28,18 +28,17 @@ exports.getNextId = async (req, res) => {
   }
 };
 
-
-
 // Create a new member and dependents
 exports.createMember = async (req, res) => {
-  console.log(req.body);
+  // console.log(req.body);
+  // return
   let newlyAddedMember = {};
   try {
     const {
       member_id,
       name,
       area,
-      password,
+     password,
       res_tel,
       mob_tel,
       address,
@@ -48,7 +47,7 @@ exports.createMember = async (req, res) => {
       birthday,
     } = req.body;
     const { dependents } = req.body;
-
+// console.log('dependents: ', dependents)ok
     // Validate required fields
     if (!member_id || !area || !name) {
       return res.status(400).json({
@@ -62,7 +61,7 @@ exports.createMember = async (req, res) => {
       member_id,
       name,
       area,
-      password,
+     password:member_id,
       res_tel,
       mob_tel,
       address,
@@ -70,10 +69,14 @@ exports.createMember = async (req, res) => {
       nic,
       birthday,
     });
-
-    await newMember.save()
+// console.log('newMember: ', newMember)
+// return
+    await newMember
+      .save()
       .then((member) => {
         newlyAddedMember = member;
+        console.log('newlyAddedMember:',newlyAddedMember)
+        // return
       })
       .catch((error) => {
         console.error("Error saving member:", error);
@@ -99,9 +102,10 @@ exports.createMember = async (req, res) => {
             member_id: newlyAddedMember._id, // Link dependent to the newly added member
           });
 
-          await newDependent.save()
+          await newDependent
+            .save()
             .then((savedDependent) => {
-              console.log("Dependent saved successfully:", savedDependent);
+              // console.log("Dependent saved successfully:", savedDependent);
               dependentIds.push(savedDependent._id); // Collect dependent IDs
             })
             .catch((error) => {
@@ -118,7 +122,8 @@ exports.createMember = async (req, res) => {
 
     // Update the member document with the dependents' IDs
     newlyAddedMember.dependents = dependentIds;
-    await newlyAddedMember.save()
+    await newlyAddedMember
+      .save()
       .then(() => {
         console.log("Member updated with dependents successfully.");
       })
@@ -130,7 +135,6 @@ exports.createMember = async (req, res) => {
           error: error.message,
         });
       });
-
 
     res.status(200).json({
       success: true,
@@ -146,9 +150,6 @@ exports.createMember = async (req, res) => {
     });
   }
 };
-
-
-
 
 // Retrieve all members without sending the password field
 exports.getAllMembers = async (req, res) => {
@@ -211,7 +212,9 @@ exports.getMemberAllById = async (req, res) => {
   try {
     // console.log('Get Dependents')
 
-    const member = await Member.findOne({ member_id: member_id }).select('-password').populate('dependents');
+    const member = await Member.findOne({ member_id: member_id })
+      .select("-password")
+      .populate("dependents");
     // const member = await Member.findOne({ member_id: member_id });  // Populate dependents
     // console.log(member[0]._id)
     if (member) {
@@ -223,7 +226,6 @@ exports.getMemberAllById = async (req, res) => {
       res
         .status(200)
         .json({ success: true, member: member, dependents: member.dependents });
-      
     }
   } catch (error) {
     res.status(500).json({
@@ -239,42 +241,42 @@ exports.getFamilyRegisterById = async (req, res) => {
   const { member_id } = req.query;
 
   try {
-//     // Fetch the member details
-//     const member = await Member.findOne({ member_id: member_id }).select(
-//       "name _id dateOfDeath"
-//     ).populate('dependents');
-// // console.log(member)
+    //     // Fetch the member details
+    //     const member = await Member.findOne({ member_id: member_id }).select(
+    //       "name _id dateOfDeath"
+    //     ).populate('dependents');
+    // // console.log(member)
 
-//     // If no member is found, return an appropriate error response
-//     if (!member ) {
-//       return res.status(404).json({
-//         success: false,
-//         message: "Member not found.",
-//       });
-//     }
-const member = await Member.findOne({ member_id: member_id })
-  .select("name _id dateOfDeath")
-  .populate("dependents");
+    //     // If no member is found, return an appropriate error response
+    //     if (!member ) {
+    //       return res.status(404).json({
+    //         success: false,
+    //         message: "Member not found.",
+    //       });
+    //     }
+    const member = await Member.findOne({ member_id: member_id })
+      .select("name _id dateOfDeath")
+      .populate("dependents");
 
-if (!member) {
-  throw new Error("Member not found");
-}
+    if (!member) {
+      throw new Error("Member not found");
+    }
 
-// Add "relationship": "member" to the member object
-const memberWithRelationship = {
-  ...member.toObject(), // Convert Mongoose document to plain JS object
-  relationship: "සාමාජික",
-};
+    // Add "relationship": "member" to the member object
+    const memberWithRelationship = {
+      ...member.toObject(), // Convert Mongoose document to plain JS object
+      relationship: "සාමාජික",
+    };
 
-// // Create a new array with the member object and dependents
-// const dependentsWithRelationship = member.dependents.map((dependent) => ({
-//   ...dependent.toObject(),
-//   relationship: "dependent",
-// }));
+    // // Create a new array with the member object and dependents
+    // const dependentsWithRelationship = member.dependents.map((dependent) => ({
+    //   ...dependent.toObject(),
+    //   relationship: "dependent",
+    // }));
 
-const FamilyRegister = [memberWithRelationship, ...member.dependents];
+    const FamilyRegister = [memberWithRelationship, ...member.dependents];
 
-console.log(FamilyRegister);
+    // console.log(FamilyRegister);
 
     // Add "relationship: 'member'" to the first member object
     // member = { ...member, relationship: "සාමාජික" };
@@ -284,7 +286,7 @@ console.log(FamilyRegister);
     // const dependents = await Dependent.find({
     //   member_id: member._id,
     // }).select("name relationship _id dateOfDeath");
-// const dependents=member._doc.dependents
+    // const dependents=member._doc.dependents
     // Add the member to the beginning of the dependents array
     // dependents.unshift(member);
 
@@ -307,7 +309,7 @@ console.log(FamilyRegister);
 exports.getMemberAllByArea = async (req, res) => {
   // console.log("first");
   const { area } = req.query; // Extract the query parameter
-  console.log(area); // Log the area to check the value
+  // console.log(area); // Log the area to check the value
 
   try {
     const members = await Member.find({ area: area })
@@ -323,6 +325,21 @@ exports.getMemberAllByArea = async (req, res) => {
     });
   }
 };
+
+//get all member ids for attendance chart
+exports.getCurrentMemberIds=async(req,res)=>{
+  try {
+    const members = await Member.find().select("member_id").sort("member_id");
+    const memberIds = members.map(member => member.member_id);
+    res.status(200).json({ success: true, memberIds: memberIds });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Error fetching members.",
+      error: error.message,
+    });
+  }
+}
 
 //update the member date of death
 exports.updateDiedStatus = async (req, res) => {
@@ -442,28 +459,39 @@ exports.updateDependentDiedStatus = async (req, res) => {
   }
 };
 
-//update member and dependents
+// Update member and dependents
 exports.updateMember = async (req, res) => {
   try {
     const MemberNewData = req.body;
     const _id = MemberNewData._id;
-    const dependents = MemberNewData.dependents;
+    const NewDependents = MemberNewData.dependents;
 
-    // First, update the member's data (excluding dependents)
-    // const member = await Member.findByIdAndUpdate(_id, MemberNewData, { new: true });
-    const member = await Member.findById(_id);
-    if (!member) {
+    // Getting current data of the member
+    const MemberExistingData = await Member.findById(_id);
+    if (!MemberExistingData) {
       return res.status(404).json({ success: false, message: "Member not found." });
     }
-console.log(member)
+
+    // Prepare new member data without dependents
+    const NewMemberData = { ...MemberNewData };
+    NewMemberData.dependents = MemberExistingData.dependents;
+
+    // Update the member's data (excluding dependents)
+    const member = await Member.findByIdAndUpdate(_id, NewMemberData, { new: true });
+    if (!member) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Member not found during update." });
+    }
+
     // Handle dependents update
-    if (dependents && dependents.length > 0) {
+    if (NewDependents && NewDependents.length > 0) {
       // First, delete the existing dependents for this member
-      await Dependent.deleteMany({ _id: { $in: member.dependents } });
+      await Dependent.deleteMany({ _id: { $in: MemberExistingData.dependents } });
 
       // Create and save new dependents
       const dependentIds = [];
-      for (const dependent of dependents) {
+      for (const dependent of NewDependents) {
         if (dependent.name !== "") {
           const newDependent = new Dependent({
             name: dependent.name,
@@ -481,18 +509,7 @@ console.log(member)
       member.dependents = dependentIds;
 
       // Save the member with the updated dependents
-      await member.save()
-        .then(() => {
-          console.log("Member updated with new dependents successfully.");
-        })
-        .catch((error) => {
-          console.error("Error updating member with dependents:", error);
-          return res.status(500).json({
-            success: false,
-            message: "Error updating member with dependents.",
-            error: error.message,
-          });
-        });
+      await member.save();
     }
 
     res.status(200).json({
@@ -509,7 +526,6 @@ console.log(member)
     });
   }
 };
-
 
 
 // Delete a member

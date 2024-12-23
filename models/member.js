@@ -68,6 +68,7 @@ const MemberSchema = new Schema(
 
 // Add a pre-save hook to set the default password and hash it
 MemberSchema.pre("save", async function (next) {
+
   try {
     if (!this.password) {
       // Log the situation if no password is set
@@ -80,7 +81,7 @@ MemberSchema.pre("save", async function (next) {
       this.password = await bcrypt.hash(this.password, salt);
     }
 
-    console.log("Password set to:", this.password);  // Ensure password is set before saving
+    // console.log("Password set to:", this.password);  // Ensure password is set before saving
     next();
   } catch (error) {
     console.error("Error in pre-save:", error);
