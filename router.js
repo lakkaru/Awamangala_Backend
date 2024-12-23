@@ -41,10 +41,8 @@ router.put("/dependent/:id", dependantController.updateDependentById);
 router.delete("/dependent/:id", dependantController.deleteDependentById);
 
 router.post("/account-payments", memberAccountController.createMemberPayment);
-router.get(
-    "/getMembershipPaymentsById",
-    memberAccountController.getMembershipPaymentsById
-  );
+router.get("/getMembershipPaymentsById", memberAccountController.getMembershipPaymentsById);
+router.get("/getPaymentsByDay", memberAccountController.getPaymentsByDay);
   
 
 

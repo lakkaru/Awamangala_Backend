@@ -7,7 +7,7 @@ const Member = require("../models/member");
 //create new payment
 exports.createMemberPayment = async (req, res) => {
   const { date, paymentsArray } = req.body;
-// console.log(paymentsArray)
+  // console.log(paymentsArray)
   // Validate request body
   if (!date || !Array.isArray(paymentsArray)) {
     return res.status(400).json({ error: "Invalid data format" });
@@ -70,7 +70,7 @@ exports.createMemberPayment = async (req, res) => {
 // Get all payments by a member
 exports.getMembershipPaymentsById = async (req, res) => {
   const { member_id } = req.query;
-// console.log(memberId)
+  // console.log(memberId)
   try {
     // Find the member with member_id
     const member = await Member.findOne({ _id: member_id }).select(
@@ -91,7 +91,7 @@ exports.getMembershipPaymentsById = async (req, res) => {
       0
     );
     // Map membership payments to the required structure
-    const membershipFormatted = membershipPayments.map(payment => ({
+    const membershipFormatted = membershipPayments.map((payment) => ({
       date: new Date(payment.date).toISOString(),
       mem_id: payment._id,
       memAmount: payment.amount || 0,
@@ -104,13 +104,13 @@ exports.getMembershipPaymentsById = async (req, res) => {
       memberId: member._id,
     }).select("date amount _id");
 
-     // Calculate the total for fine payments
-     const fineTotalAmount = finePayments.reduce(
+    // Calculate the total for fine payments
+    const fineTotalAmount = finePayments.reduce(
       (sum, payment) => sum + payment.amount,
       0
     );
     // Map fine payments to the required structure
-    const fineFormatted = finePayments.map(payment => ({
+    const fineFormatted = finePayments.map((payment) => ({
       date: new Date(payment.date).toISOString(),
       mem_id: null,
       memAmount: 0,
@@ -138,7 +138,6 @@ exports.getMembershipPaymentsById = async (req, res) => {
   }
 };
 
-
 //get all fine payments by member
 exports.getFinesByMemberId = async (req, res) => {
   const { memberId } = req.params;
@@ -164,6 +163,106 @@ exports.getFinesByMemberId = async (req, res) => {
     res.status(200).json(finePayments);
   } catch (error) {
     console.error("Error fetching fines:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+//getting all payments on a particular day
+exports.getPaymentsByDay = async (req, res) => {
+  const { date } = req.query; // Expecting date in 'YYYY-MM-DD' format
+  // console.log("date: ", date);
+
+  try {
+    // Parse the date to get the exact day (start of the day, midnight)
+    const selectedDate = new Date(date);
+    selectedDate.setHours(0, 0, 0, 0); // Start of the day (midnight)
+    const endOfDay = new Date(selectedDate);
+    endOfDay.setHours(23, 59, 59, 999); // End of the day (just before midnight)
+
+    // Query for membership payments on that date
+    const membershipPayments = await MembershipAccount.find({
+      date: { $gte: selectedDate, $lte: endOfDay },
+    }).select("memberId amount createdAt");
+
+    // Query for fine payments on that date
+    const finePayments = await FinePaymentAccount.find({
+      date: { $gte: selectedDate, $lte: endOfDay },
+    }).select("memberId amount createdAt");
+
+    // Combine both payment arrays into one
+    const allPayments = [...membershipPayments, ...finePayments];
+
+    // Group payments by memberId and type (membership vs fine)
+    const groupedPayments = allPayments.reduce((group, payment) => {
+      const { memberId, amount, createdAt } = payment;
+
+      // Ensure the memberId is in the group
+      if (!group[memberId]) {
+        group[memberId] = { membershipPayments: [], finePayments: [] };
+      }
+
+      // Group by payment type
+      if (membershipPayments.includes(payment)) {
+        group[memberId].membershipPayments.push({ amount, createdAt });
+      } else {
+        group[memberId].finePayments.push({ amount, createdAt });
+      }
+
+      return group;
+    }, {});
+
+    // Fetch member details for all memberIds
+    const memberIds = Object.keys(groupedPayments);
+    const members = await Member.find({ _id: { $in: memberIds } }).select(
+      "_id member_id name"
+    );
+
+    // Prepare the final response structure with totals and member details
+    let response = members.map((member) => {
+      const memberPayments = groupedPayments[member._id.toString()] || {
+        membershipPayments: [],
+        finePayments: [],
+      };
+
+      const membershipTotal = memberPayments.membershipPayments.reduce(
+        (sum, payment) => sum + payment.amount,
+        0
+      );
+      const fineTotal = memberPayments.finePayments.reduce(
+        (sum, payment) => sum + payment.amount,
+        0
+      );
+
+      return {
+        member_id: member.member_id, // Use member_id here
+        name: member.name,
+        payments: {
+          membershipPayments: memberPayments.membershipPayments.sort(
+            (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+          ),
+          finePayments: memberPayments.finePayments.sort(
+            (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+          ),
+        },
+        membershipTotal,
+        fineTotal,
+      };
+    });
+
+    // Sort the response by member_id in ascending order
+    response.sort((a, b) => {
+      if (typeof a.member_id === "string" && typeof b.member_id === "string") {
+        return a.member_id.localeCompare(b.member_id); // String comparison
+      }
+      return a.member_id - b.member_id; // Numeric comparison
+    });
+
+    res.status(200).json({
+      message: "Payments retrieved successfully",
+      paymentsByMember: response,
+    });
+  } catch (error) {
+    console.error("Error fetching payments by day:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 };
