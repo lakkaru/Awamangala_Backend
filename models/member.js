@@ -58,7 +58,15 @@ const MemberSchema = new Schema(
       type: Date,
     },
     dependents: {
-      type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Dependent' }],
+      type: [{ type: mongoose.Schema.Types.ObjectId, ref: "Dependent" }],
+    },
+    deactivated_at: {
+      type: Date,
+      default: null,
+    },
+    status: {
+      type: String,
+      default: "regular",
     },
   },
   {
@@ -68,7 +76,6 @@ const MemberSchema = new Schema(
 
 // Add a pre-save hook to set the default password and hash it
 MemberSchema.pre("save", async function (next) {
-
   try {
     if (!this.password) {
       // Log the situation if no password is set
@@ -89,7 +96,6 @@ MemberSchema.pre("save", async function (next) {
   }
 });
 
-
 // Add additional indexes
 MemberSchema.index({ email: 1 });
 MemberSchema.index({ name: 1 });
@@ -97,4 +103,3 @@ MemberSchema.index({ name: 1 });
 const Member = mongoose.model("Member", MemberSchema);
 
 module.exports = Member;
-

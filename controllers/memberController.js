@@ -38,7 +38,7 @@ exports.createMember = async (req, res) => {
       member_id,
       name,
       area,
-     password,
+      password,
       res_tel,
       mob_tel,
       address,
@@ -47,7 +47,7 @@ exports.createMember = async (req, res) => {
       birthday,
     } = req.body;
     const { dependents } = req.body;
-// console.log('dependents: ', dependents)ok
+    // console.log('dependents: ', dependents)ok
     // Validate required fields
     if (!member_id || !area || !name) {
       return res.status(400).json({
@@ -61,7 +61,7 @@ exports.createMember = async (req, res) => {
       member_id,
       name,
       area,
-     password:member_id,
+      password: member_id,
       res_tel,
       mob_tel,
       address,
@@ -69,13 +69,13 @@ exports.createMember = async (req, res) => {
       nic,
       birthday,
     });
-// console.log('newMember: ', newMember)
-// return
+    // console.log('newMember: ', newMember)
+    // return
     await newMember
       .save()
       .then((member) => {
         newlyAddedMember = member;
-        console.log('newlyAddedMember:',newlyAddedMember)
+        console.log("newlyAddedMember:", newlyAddedMember);
         // return
       })
       .catch((error) => {
@@ -151,10 +151,17 @@ exports.createMember = async (req, res) => {
   }
 };
 
-// Retrieve all members without sending the password field
-exports.getAllMembers = async (req, res) => {
+// Retrieve all members who are not deactivated and not free or convenient members
+exports.getAllActiveMembers = async (req, res) => {
   try {
-    const members = await Member.find().select("-password"); // Excludes the password field
+    const members = await Member.find({
+      $or: [
+        { deactivated_at: { $exists: false } }, // No deactivatedDate field
+        { deactivated_at: null }, // deactivatedDate is explicitly null
+      ]
+    })
+      .select("-password")
+      .sort("member_id"); // Excludes the password field
     res.status(200).json({ success: true, data: members });
   } catch (error) {
     res.status(500).json({
@@ -202,6 +209,57 @@ exports.getMemberById = async (req, res) => {
       message: "Error fetching member.",
       error: error.message,
     });
+  }
+};
+
+//get member death details
+// exports.getMemberDeathById = async (req, res) => {
+
+exports.getMembershipDeathById = async (req, res) => {
+  try {
+    const { member_id } = req.query;
+    // console.log(member_id)
+    // Find the member by member_id and populate dependents
+    const member = await Member.findOne({ member_id })
+      .populate("dependents", "name relationship dateOfDeath") // Populate dependents with necessary fields
+      .select("_id member_id name dateOfDeath dependents area");
+
+    if (!member) {
+      return res.status(404).json({ error: "Member not found" });
+    }
+
+    // Check for deceased dependents
+    const deceasedDependents = member.dependents.filter(
+      (dependent) => dependent.dateOfDeath
+    );
+
+    // If member or any dependent has `dateOfDeath`, return the information
+    if (member.dateOfDeath || deceasedDependents.length > 0) {
+      return res.status(200).json({
+        message: "Deceased member or dependents retrieved",
+        data: {
+          member: {
+            _id: member._id,
+            member_id: member.member_id,
+            name: member.name,
+            area: member.area,
+            mob_tel: member.mob_tel,
+            res_tel: member.res_tel,
+            dateOfDeath: member.dateOfDeath,
+          },
+          dependents: deceasedDependents, // Array of deceased dependents
+        },
+      });
+    }
+
+    // If no `dateOfDeath` for member or dependents, return an empty array
+    return res.status(200).json({
+      message: "No deceased member or dependents found",
+      data: [],
+    });
+  } catch (error) {
+    console.error("Error retrieving member and dependents:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 
@@ -312,7 +370,13 @@ exports.getMemberAllByArea = async (req, res) => {
   // console.log(area); // Log the area to check the value
 
   try {
-    const members = await Member.find({ area: area })
+    const members = await Member.find({
+      area: area, // Match the specific area
+      $or: [
+        { deactivated_at: { $exists: false } }, // No deactivatedDate field
+        { deactivated_at: null }, // deactivatedDate is explicitly null
+      ],
+    })
       .select("member_id name area mob_tel res_tel")
       .sort("member_id");
 
@@ -327,10 +391,18 @@ exports.getMemberAllByArea = async (req, res) => {
 };
 
 //get all member ids for attendance chart
-exports.getCurrentMemberIds=async(req,res)=>{
+exports.getCurrentMemberIds = async (req, res) => {
   try {
-    const members = await Member.find().select("member_id").sort("member_id");
-    const memberIds = members.map(member => member.member_id);
+    const members = await Member.find({
+      $or: [
+        { deactivated_at: { $exists: false } }, // No deactivatedDate field
+        { deactivated_at: null }, // deactivatedDate is explicitly null
+      ],
+    })
+      .select("member_id") // Select only the member_id field
+      .sort("member_id"); // Sort by member_id
+
+    const memberIds = members.map((member) => member.member_id);
     res.status(200).json({ success: true, memberIds: memberIds });
   } catch (error) {
     res.status(500).json({
@@ -339,7 +411,7 @@ exports.getCurrentMemberIds=async(req,res)=>{
       error: error.message,
     });
   }
-}
+};
 
 //update the member date of death
 exports.updateDiedStatus = async (req, res) => {
@@ -469,7 +541,9 @@ exports.updateMember = async (req, res) => {
     // Getting current data of the member
     const MemberExistingData = await Member.findById(_id);
     if (!MemberExistingData) {
-      return res.status(404).json({ success: false, message: "Member not found." });
+      return res
+        .status(404)
+        .json({ success: false, message: "Member not found." });
     }
 
     // Prepare new member data without dependents
@@ -477,7 +551,9 @@ exports.updateMember = async (req, res) => {
     NewMemberData.dependents = MemberExistingData.dependents;
 
     // Update the member's data (excluding dependents)
-    const member = await Member.findByIdAndUpdate(_id, NewMemberData, { new: true });
+    const member = await Member.findByIdAndUpdate(_id, NewMemberData, {
+      new: true,
+    });
     if (!member) {
       return res
         .status(404)
@@ -487,7 +563,9 @@ exports.updateMember = async (req, res) => {
     // Handle dependents update
     if (NewDependents && NewDependents.length > 0) {
       // First, delete the existing dependents for this member
-      await Dependent.deleteMany({ _id: { $in: MemberExistingData.dependents } });
+      await Dependent.deleteMany({
+        _id: { $in: MemberExistingData.dependents },
+      });
 
       // Create and save new dependents
       const dependentIds = [];
@@ -527,7 +605,6 @@ exports.updateMember = async (req, res) => {
   }
 };
 
-
 // Delete a member
 exports.deleteMember = async (req, res) => {
   try {
@@ -549,5 +626,80 @@ exports.deleteMember = async (req, res) => {
       message: "Error deleting member.",
       error: error.message,
     });
+  }
+};
+
+// Function to update deactivatedDate for a member
+//postman PUT:http://127.0.0.1:3001/api/member/267/deactivate
+//body{  "deactivatedDate": "2024-12-25T16:00:00Z"}
+
+exports.updateDeactivatedDate = async (req, res) => {
+  try {
+    const { memberId } = req.params; // Get memberId from the URL parameters
+    const { deactivatedDate } = req.body; // Get deactivatedDate from the request body
+
+    // Ensure deactivatedDate is provided, if not, use the current date
+    const deactivationDate = deactivatedDate
+      ? new Date(deactivatedDate)
+      : new Date();
+
+    // Update the member's deactivatedDate field
+    const updatedMember = await Member.findOneAndUpdate(
+      { member_id: memberId }, // Search by member_id
+      { deactivated_at: deactivationDate }, // Set the new deactivatedDate
+      { new: true } // Return the updated member document
+    );
+
+    // If the member is not found, return an error response
+    if (!updatedMember) {
+      return res.status(404).json({ message: "Member not found." });
+    }
+
+    // Send a success response with the updated member data
+    return res.status(200).json({
+      message: "Member deactivated successfully.",
+      member: updatedMember,
+    });
+  } catch (error) {
+    // Handle errors and send a response
+    console.error("Error updating deactivatedDate:", error);
+    return res
+      .status(500)
+      .json({ message: "Internal server error", error: error.message });
+  }
+};
+
+// Function to update deactivatedDate for a member
+exports.updateMemberStatus = async (req, res) => {
+  try {
+    const { memberId } = req.params; // Get memberId from the URL parameters
+    const { status } = req.body; // Get deactivatedDate from the request body
+
+    // Ensure status is provided, if not, use regular
+    const memberStatus = status ? status : "regular";
+
+    // Update the member's regular field
+    const updatedMember = await Member.findOneAndUpdate(
+      { member_id: memberId }, // Search by member_id
+      { status: memberStatus }, // Set the new deactivatedDate
+      { new: true } // Return the updated member document
+    );
+
+    // If the member is not found, return an error response
+    if (!updatedMember) {
+      return res.status(404).json({ message: "Member not found." });
+    }
+
+    // Send a success response with the updated member data
+    return res.status(200).json({
+      message: "Member deactivated successfully.",
+      member: updatedMember,
+    });
+  } catch (error) {
+    // Handle errors and send a response
+    console.error("Error updating deactivatedDate:", error);
+    return res
+      .status(500)
+      .json({ message: "Internal server error", error: error.message });
   }
 };

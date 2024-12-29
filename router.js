@@ -12,11 +12,14 @@ const loanPaymentController = require("./controllers/loanPaymentController");
 const loanInterestPaymentController = require("./controllers/loanInterestPaymentController");
 const penaltyInterestPayment = require("./controllers/penaltyInterestPaymentController");
 const fullPayments = require("./controllers/fullPaymentController");
+const funeralController = require("./controllers/funeralController");
+const attendanceController = require("./controllers/attendanceController");  
 
-router.get("/getAllMembers", memberController.getAllMembers);
+router.get("/getAllActiveMembers", memberController.getAllActiveMembers);
 router.get("/getMembersInfo", memberController.getAllMembersBasicInfo);
 
 router.get("/getMemberById", memberController.getMemberById);
+router.get("/getMembershipDeathById", memberController.getMembershipDeathById);
 
 router.get("/getMemberAllById", memberController.getMemberAllById);
 router.get("/getFamilyRegister", memberController.getFamilyRegisterById);
@@ -43,6 +46,8 @@ router.delete("/dependent/:id", dependantController.deleteDependentById);
 router.post("/account-payments", memberAccountController.createMemberPayment);
 router.get("/getMembershipPaymentsById", memberAccountController.getMembershipPaymentsById);
 router.get("/getPaymentsByDay", memberAccountController.getPaymentsByDay);
+router.get("/getPaymentsById", memberAccountController.getPaymentsById);
+  
   
 
 
@@ -120,5 +125,16 @@ router.delete(
 router.get("/loan-all-payments/:loanId", fullPayments.getLoanAllPayments);
 router.get("/period-all-payments", fullPayments.getPaymentsByPeriod);
 router.get("/period-all-loans", fullPayments.getAllExpenses);
+
+
+router.post("/createFuneral", funeralController.createFuneral);
+router.get("/getLastAssignment", funeralController.getLastAssignment);
+router.get("/funeralId", funeralController.getFuneralByDeceasedId);
+
+router.post("/saveAttendance", attendanceController.createAttendance);
+
+//testing routs
+router.put('/member/:memberId/deactivate', memberController.updateDeactivatedDate);
+router.put('/member/:memberId/status', memberController.updateMemberStatus);
 
 module.exports = router;

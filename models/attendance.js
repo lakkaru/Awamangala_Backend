@@ -1,23 +1,25 @@
 const mongoose = require("mongoose");
 
-const FuneralAttendanceSchema = new mongoose.Schema(
+const AttendanceSchema = new mongoose.Schema(
   {
     date: {
       type: Date,
       required: true,
       // default: Date.now, // Default to the current date
     },
-    memberId: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Member", // Reference the member collection
-        required: true,
-      },
-    ],
-    funeralId: {
+    subject:{
+      type: String,
+      required: true,
+    },
+    
+    eventId: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
       ref: "Funeral", // Reference the Funeral collection
+    },
+    absent: {
+      type: Array,
+      default: []
     },
   },
   {
@@ -25,4 +27,4 @@ const FuneralAttendanceSchema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model("FuneralAttendance", FuneralAttendanceSchema);
+module.exports = mongoose.model("Attendance", AttendanceSchema);

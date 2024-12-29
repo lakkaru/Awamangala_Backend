@@ -7,14 +7,29 @@ const FuneralSchema = new mongoose.Schema(
       required: true,
       // default: Date.now, // Default to the current date
     },
-    memberId: {
+    member_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Member", // Reference the member collection
-      required: true,
+      default: null,
     },
-    name:{
-        type:String
-    }
+    deceased_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Dependent", // Reference the dependent collection
+      default: null,
+    },
+    cemeteryAssignments: {
+      type: Array,
+      default: []
+    },
+    funeralAssignment: {
+      type: Array,
+      default: []
+    },
+    attendance: {
+      type: Array,
+      default: []
+    },
+    
   },
   {
     timestamps: true, // Automatically manage `createdAt` and `updatedAt` fields
