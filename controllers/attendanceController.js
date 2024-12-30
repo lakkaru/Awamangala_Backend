@@ -11,14 +11,6 @@ const createAttendance = async (req, res) => {
       return res.status(400).json({ error: "Invalid input data" });
     }
 
-    // Filter only members who are attending
-    // const attendingMembers = attendance
-    //   .filter(member => member.checked === true)
-    //   .map(member => member.memberId);
-
-    // if (attendingMembers.length === 0) {
-    //   return res.status(400).json({ error: "No members marked as attending" });
-    // }
     console.log(date,
       subject,
       eventId,

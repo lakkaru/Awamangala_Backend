@@ -213,7 +213,6 @@ exports.getMemberById = async (req, res) => {
 };
 
 //get member death details
-// exports.getMemberDeathById = async (req, res) => {
 
 exports.getMembershipDeathById = async (req, res) => {
   try {

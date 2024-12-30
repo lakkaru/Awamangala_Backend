@@ -128,8 +128,9 @@ router.get("/period-all-loans", fullPayments.getAllExpenses);
 
 
 router.post("/createFuneral", funeralController.createFuneral);
-router.get("/getLastAssignment", funeralController.getLastAssignment);
+router.get("/getLastAssignmentInfo", funeralController.getLastAssignmentInfo);
 router.get("/funeralId", funeralController.getFuneralByDeceasedId);
+router.get("/funeralAssignments", funeralController.getFuneralAssignmentsByDeceasedId);
 
 router.post("/saveAttendance", attendanceController.createAttendance);
 

@@ -21,7 +21,11 @@ const FuneralSchema = new mongoose.Schema(
       type: Array,
       default: []
     },
-    funeralAssignment: {
+    funeralAssignments: {
+      type: Array,
+      default: []
+    },
+    removedMembers: {
       type: Array,
       default: []
     },
