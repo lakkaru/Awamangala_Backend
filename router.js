@@ -4,6 +4,7 @@ const router = express.Router();
 
 // const userController = require("./controllers/userController");
 const memberController = require("./controllers/memberController");
+const adminController = require("./controllers/adminController");
 const dependantController = require("./controllers/dependentController");
 // const paymentController = require("./controllers/paymentController");
 const memberAccountController = require("./controllers/memberAccountController");
@@ -26,10 +27,12 @@ router.get("/getFamilyRegister", memberController.getFamilyRegisterById);
 
 router.get("/getMemberAllByArea", memberController.getMemberAllByArea);
 router.get("/getCurrentMemberIds", memberController.getCurrentMemberIds);
+router.get("/getAdminsForFuneral", adminController.getAdminsForFuneral);
 
 router.get("/member/getNextId", memberController.getNextId);
 // router.get("/member/removeFields", memberController.removeFields);
 router.post("/createMember", memberController.createMember);
+router.post("/createAdmins", adminController.createAdmins);
 router.post("/updateMember", memberController.updateMember);
 
 router.post("/updateDiedStatus", memberController.updateDiedStatus);
@@ -131,11 +134,13 @@ router.post("/createFuneral", funeralController.createFuneral);
 router.get("/getLastAssignmentInfo", funeralController.getLastAssignmentInfo);
 router.get("/funeralId", funeralController.getFuneralByDeceasedId);
 router.get("/funeralAssignments", funeralController.getFuneralAssignmentsByDeceasedId);
+router.post("/eventAbsents", funeralController.updateEventAbsents);
 
 router.post("/saveAttendance", attendanceController.createAttendance);
 
 //testing routs
 router.put('/member/:memberId/deactivate', memberController.updateDeactivatedDate);
 router.put('/member/:memberId/status', memberController.updateMemberStatus);
+router.put('/member/:memberId/previousDue', memberController.updatePreviousDue);
 
 module.exports = router;

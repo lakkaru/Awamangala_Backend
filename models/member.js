@@ -68,6 +68,11 @@ const MemberSchema = new Schema(
       type: String,
       default: "regular",
     },
+    previousDue: {
+      type: Number,
+      default: 0,
+    },
+    
   },
   {
     timestamps: { createdAt: "created_at", updatedAt: "updated_at" }, // Auto-manage created_at and updated_at fields
@@ -97,8 +102,8 @@ MemberSchema.pre("save", async function (next) {
 });
 
 // Add additional indexes
-MemberSchema.index({ email: 1 });
-MemberSchema.index({ name: 1 });
+// MemberSchema.index({ email: 1 });
+// MemberSchema.index({ name: 1 });
 
 const Member = mongoose.model("Member", MemberSchema);
 

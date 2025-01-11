@@ -11,10 +11,10 @@ const createAttendance = async (req, res) => {
       return res.status(400).json({ error: "Invalid input data" });
     }
 
-    console.log(date,
-      subject,
-      eventId,
-      absent,)
+    // console.log(date,
+    //   subject,
+    //   eventId,
+    //   absent,)
     // Create a new attendance document
     const attendanceDocument = new Attendance({
       date,

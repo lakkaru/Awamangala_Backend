@@ -470,6 +470,42 @@ exports.updateDiedStatus = async (req, res) => {
     });
   }
 };
+//update the member previous due
+exports.updatePreviousDue = async (req, res) => {
+  const { member_id, previousDue } = req.body;
+  // console.log(req.body)
+ 
+  try {
+    // Use Mongoose's `findOneAndUpdate` to update the died status
+    const updatedMember = await Member.findOneAndUpdate(
+      { member_id }, // Filter condition
+      { $set: { previousDue } }, // Update the `died` field
+      { new: true, runValidators: true } // Return the updated document and run validators
+    );
+
+    // If no member is found, return a 404 error
+    if (!updatedMember) {
+      return res.status(404).json({
+        success: false,
+        message: "Member not found.",
+      });
+    }
+
+    // Respond with the updated member
+    res.status(200).json({
+      success: true,
+      message: "Previous due updated successfully.",
+      member: updatedMember,
+    });
+  } catch (error) {
+    // Handle any server or database errors
+    res.status(500).json({
+      success: false,
+      message: "Error updating Previous due.",
+      error: error.message,
+    });
+  }
+};
 
 //update the Dependent death
 exports.updateDependentDiedStatus = async (req, res) => {
