@@ -134,7 +134,7 @@ router.post("/createFuneral", funeralController.createFuneral);
 router.get("/getLastAssignmentInfo", funeralController.getLastAssignmentInfo);
 router.get("/funeralId", funeralController.getFuneralByDeceasedId);
 router.get("/funeralAssignments", funeralController.getFuneralAssignmentsByDeceasedId);
-router.post("/eventAbsents", funeralController.updateEventAbsents);
+router.post("/funeralAbsents", funeralController.updateFuneralAbsents);
 
 router.post("/saveAttendance", attendanceController.createAttendance);
 

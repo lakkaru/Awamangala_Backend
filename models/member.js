@@ -72,7 +72,13 @@ const MemberSchema = new Schema(
       type: Number,
       default: 0,
     },
-    
+    fines: [
+      {
+        eventId: { type: mongoose.Schema.Types.ObjectId, },
+        eventType: { type: String },
+        amount: { type: Number },
+      },
+    ],
   },
   {
     timestamps: { createdAt: "created_at", updatedAt: "updated_at" }, // Auto-manage created_at and updated_at fields

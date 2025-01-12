@@ -82,32 +82,78 @@ exports.getFuneralByDeceasedId = async (req, res) => {
     });
   }
 };
-//get funeral attendance by deceased id
+//get funeral assignment by deceased id
 exports.getFuneralAssignmentsByDeceasedId = async (req, res) => {
   try {
     // console.log(req.query)
     const { deceased_id } = req.query;
 
-    const funeralAttendance = await Funeral.findOne({
+    const funeralAssignments = await Funeral.findOne({
       deceased_id: deceased_id,
     }).select("cemeteryAssignments funeralAssignments _id"); // Find the funeral by deceased_id
     //   console.log(funeralAttendance._id)
-    return res.status(200).json(funeralAttendance);
+    return res.status(200).json(funeralAssignments);
   } catch (error) {
     console.error(
-      "Error getting funeral attendance by deceased_id:",
+      "Error getting funeral assignment by deceased_id:",
       error.message
     );
     res.status(500).json({
-      message: "Error getting funeral attendance by deceased_id",
+      message: "Error getting funeral assignment by deceased_id",
       error: error.message,
     });
   }
 };
 
-//update event absents
-exports.updateEventAbsents = async (req, res) => {
-  // console.log(req.body)
+// Update event absents
+exports.updateFuneralAbsents = async (req, res) => {
   try {
-  } catch (error) {}
+    const fineAmount = 100;
+    const { funeral_id, absentArray } = req.body.absentData;
+    // console.log(funeral_id, absentArray )
+
+    // Check if both funeral_id and absentArray are provided
+    if (!funeral_id || !Array.isArray(absentArray)) {
+      return res.status(400).json({ message: "Invalid request data." });
+    }
+
+    // Update the funeral document
+    const updatedFuneral = await Funeral.findByIdAndUpdate(
+      funeral_id,
+      { eventAbsents: absentArray },
+      { new: true } // Return the updated document
+    );
+
+    // Check if the document was found and updated
+    if (!updatedFuneral) {
+      return res.status(404).json({ message: "Funeral not found." });
+    }
+    // Create bulk updates for each absent member
+    const bulkOperations = absentArray.map((memberId) => ({
+      updateOne: {
+        filter: { member_id: memberId },
+        update: {
+          $push: {
+            fines: {
+              eventId: funeral_id,
+              eventType: "funeral",
+              amount: fineAmount,
+            },
+          },
+        },
+      },
+    }));
+    // Execute the bulk write operation
+    const result = await Member.bulkWrite(bulkOperations);
+    console.log("Fines added successfully:", result);
+    // Respond with the updated document
+    res.status(200).json({
+      message: "Funeral absents updated successfully.",
+      funeral: updatedFuneral,
+    });
+  } catch (error) {
+    console.error("Error updating funeral absents:", error);
+    res.status(500).json({ message: "Internal server error." });
+  }
+  
 };
