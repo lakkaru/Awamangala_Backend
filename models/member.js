@@ -72,6 +72,10 @@ const MemberSchema = new Schema(
       type: Number,
       default: 0,
     },
+    meetingAbsents:{
+      type:Number,
+      default: 0,
+    },
     fines: [
       {
         eventId: { type: mongoose.Schema.Types.ObjectId, },

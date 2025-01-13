@@ -50,6 +50,7 @@ router.post("/account-payments", memberAccountController.createMemberPayment);
 router.get("/getMembershipPaymentsById", memberAccountController.getMembershipPaymentsById);
 router.get("/getPaymentsByDay", memberAccountController.getPaymentsByDay);
 router.get("/getPaymentsById", memberAccountController.getPaymentsById);
+router.get("/getAllDueById", memberAccountController.getAllDueOfMember);
   
   
 
@@ -136,7 +137,7 @@ router.get("/funeralId", funeralController.getFuneralByDeceasedId);
 router.get("/funeralAssignments", funeralController.getFuneralAssignmentsByDeceasedId);
 router.post("/funeralAbsents", funeralController.updateFuneralAbsents);
 
-router.post("/saveAttendance", attendanceController.createAttendance);
+router.post("/meetingAttendance", attendanceController.createMeetingAttendance);
 
 //testing routs
 router.put('/member/:memberId/deactivate', memberController.updateDeactivatedDate);

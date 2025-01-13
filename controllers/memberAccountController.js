@@ -73,13 +73,13 @@ exports.getMembershipPaymentsById = async (req, res) => {
   // console.log(member_id)
   try {
     // Find the member with member_id
-    const member = await Member.findOne({member_id: member_id }).select(
+    const member = await Member.findOne({ member_id: member_id }).select(
       "_id name mob_tel area"
     );
     if (!member) {
       return res.status(404).json({ message: "Member not found" });
     }
-// console.log(member)
+    // console.log(member)
     // Fetch membership payments
     const membershipPayments = await MembershipAccount.find({
       memberId: member._id,
@@ -138,7 +138,6 @@ exports.getMembershipPaymentsById = async (req, res) => {
   }
 };
 
-
 //get all account  payments by member
 exports.getPaymentsById = async (req, res) => {
   const { member_id } = req.query;
@@ -165,7 +164,7 @@ exports.getPaymentsById = async (req, res) => {
     // Combine and group payments by date
     const paymentMap = {};
 
-    membershipPayments.forEach(payment => {
+    membershipPayments.forEach((payment) => {
       const date = new Date(payment.date).toISOString().split("T")[0]; // Normalize date
       if (!paymentMap[date]) {
         paymentMap[date] = {
@@ -180,7 +179,7 @@ exports.getPaymentsById = async (req, res) => {
       paymentMap[date].memAmount += payment.amount || 0;
     });
 
-    finePayments.forEach(payment => {
+    finePayments.forEach((payment) => {
       const date = new Date(payment.date).toISOString().split("T")[0]; // Normalize date
       if (!paymentMap[date]) {
         paymentMap[date] = {
@@ -223,8 +222,6 @@ exports.getPaymentsById = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
-
-
 
 //get all fine payments by member
 exports.getFinesByMemberId = async (req, res) => {
@@ -355,7 +352,37 @@ exports.getPaymentsByDay = async (req, res) => {
   }
 };
 
+//get payments by period
 exports.getPaymentsByPeriod = async (req, res) => {
   try {
   } catch (error) {}
 };
+
+//get all fines and due of member
+exports.getAllDueOfMember = async (req, res) => {
+  const { member_id } = req.query;
+
+  // Validate member_id
+  if (!member_id) {
+    return res.status(400).json({ error: "Member ID is required." });
+  }
+
+  try {
+    // Find the member's dues
+    const memberDue = await Member.findOne({ member_id }).select(
+      "member_id previousDue fines"
+    );
+
+    // If no member is found, return a 404 response
+    if (!memberDue) {
+      return res.status(404).json({ error: "Member not found." });
+    }
+
+    // Respond with the member's dues
+    res.status(200).json({ success: true, due: memberDue });
+  } catch (error) {
+    console.error("Error fetching member dues:", error);
+    res.status(500).json({ error: "Internal server error." });
+  }
+};
+
